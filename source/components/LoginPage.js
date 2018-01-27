@@ -14,6 +14,7 @@ export default class LoginPage extends React.Component{
               isLoggedIn : false,
               usernameTextBox : '',
               passwordTextBox : '',
+              usedId : '',
           }
       }
 
@@ -26,7 +27,8 @@ export default class LoginPage extends React.Component{
             Alert.alert("Error", "Unauthorized, Invalid username or password")      
           }
         } else {
-          this.setState({isLoggedIn:true})  
+          var respBody= await resp.json();
+          this.setState({isLoggedIn:true, userId = respBody.hasura_id })  
         }
       }
 
@@ -39,7 +41,8 @@ export default class LoginPage extends React.Component{
             Alert.alert("Error", "Password too short / User already exists")      
           }
         } else {
-          this.setState({isLoggedIn:true})  
+          var respBody= await resp.json();
+          this.setState({isLoggedIn:true, userId = respBody.hasura_id})  
         }
       }
     
@@ -60,7 +63,9 @@ export default class LoginPage extends React.Component{
       render(){
         if(this.state.isLoggedIn === true){
             return (
-                <Tabs /> 
+               <Container>
+                 <Text>{this .props.userId}</Text>
+                 </Container>
             );
           }
           return(
