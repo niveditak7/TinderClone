@@ -11,12 +11,14 @@ import {
   Text,
   View
 } from 'react-native';
-import LoginNav from "./source/LoginNav";
+import LoginPage from "./source/LoginPage";
 
 export default class App extends Component {
   render() {
     return (
-      <LoginNav />
+      <Container>
+        <LoginPage />
+        </Container>
     );
   }
 }
