@@ -28,7 +28,7 @@ export default class LoginPage extends React.Component{
           }
         } else {
           var respBody= await resp.json();
-          this.setState({isLoggedIn:true, userId = respBody.hasura_id })  
+          this.setState({isLoggedIn:true, userId: respBody.hasura_id })  
         }
       }
 
@@ -42,7 +42,7 @@ export default class LoginPage extends React.Component{
           }
         } else {
           var respBody= await resp.json();
-          this.setState({isLoggedIn:true, userId = respBody.hasura_id})  
+          this.setState({isLoggedIn:true, userId :respBody.hasura_id})  
         }
       }
     
