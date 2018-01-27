@@ -3,9 +3,9 @@ import { Container, Content, Card, CardItem, Text, Body, View, Right, Left, Head
 import Animated from "react-native";
 import FAIcon from "react-native-vector-icons/FontAwesome";
 import { StackNavigator, TabNavigator } from "react-navigation";
-import SwipeScreen from "./screens/SwipeScreen";
-import MessagesScreen from "./screens/MessagesScreen";
-import ProfileScreen from "./screens/ProfileScreen";
+import SwipeScreen from "./SwipeScreen";
+import MessagesScreen from "./MessagesScreen";
+import ProfileScreen from "./ProfileScreen";
 
 const Tabs = TabNavigator ({
   ProfileScreen: {
