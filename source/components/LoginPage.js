@@ -64,7 +64,7 @@ export default class LoginPage extends React.Component{
         if(this.state.isLoggedIn === true){
             return (
                <Container>
-                 <Text>{this .props.userId}</Text>
+                 <Text>{this.props.userId}</Text>
                  </Container>
             );
           }
