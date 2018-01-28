@@ -7,20 +7,30 @@ export default class ProfileScreen extends Component {
   constructor(props){
     super(props);
      this.state ={
-      showMale :  false,
-      showFemale: false,
       ImageSource: null,
-      male:false,
-      female:true,
+      city:'',
+      gender:'',
     }
   }
 
-  _onPressHandle=()=>{
-    this.setState({
-      male: !this.state.male,
-      female: !this.state.female
-    })
+  addUserData=()=>{
+
   }
+
+  handleCityChange = city => {
+    this.setState({
+        ...this.state,
+        city: city
+    })
+}
+
+handleGenderChange = gender => {
+  this.setState({
+      ...this.state,
+      gender: gender
+  })
+}
+  
   selectPhotoTapped() {
     const options = {
       quality: 1.0,
@@ -73,39 +83,30 @@ render() {
           </View>
           <View style={{justifyContent:'center',alignItems:'center',padding: 5}}>
           <Text style={{fontWeight:'bold', fontSize: 25}}>Chelsea</Text></View>
-        <View style={{marginBottom:15, marginTop:15}}>
-        <Text style={styles.heading}>Discovery Settings</Text>
+        
+      <View style={{marginBottom:15,backgroundColor:'white',padding:15}}>
+      
+        <Text style={[styles.heading,{color:'#ff5f64'}]}>Discovery Settings</Text>
         <TextInput underlineColorAndroid= 'transparent'
           placeholder="Enter City"
           placeholderTextColor="gray"
           style={styles.textInput}
+          value={this.state.city} onChangeText={this.handleCityChange}
         />
+        <TextInput underlineColorAndroid= 'transparent'
+          placeholder="Enter Gender"
+          placeholderTextColor="gray"
+          style={styles.textInput}
+          value={this.state.gender} onChangeText={this.handleGenderChange}
+        /><View style={{alignItems:'center', justifyContent:'center'}}>
+         <Button style={{backgroundColor:'#ff5f64' }} onPress={this.addUserData} >
+              <Text> Sign up </Text>
+            </Button>
+            </View>
         
       </View>
-      <View style={{marginBottom:15,backgroundColor:'white',padding:15}}>
-      
-        <Text style={[styles.heading,{color:'#ff5f64'}]}>Select your Gender</Text>
-        <View style={{marginBottom:10,flexDirection:'row'}}>
-        <Text style={{flex:5}}>Male</Text><Right>
-              <Radio selected={this.state.male}  onPress={this._onPressHandle} />
-            </Right>
-        </View>
-        <View style={{marginBottom:10,flexDirection:'row'}}>
-        <Text style={{flex:5}}>Female</Text><Right>
-              <Radio selected={this.state.female} onPress={this._onPressHandle}  />
-            </Right>
-        </View>
-      </View>
-      <View style={{marginBottom:15,backgroundColor:'white',padding:15}}>
-      
-        <Text style={[styles.heading,{color:'#ff5f64'}]}>Show Me</Text>
-        <View style={{marginBottom:10,flexDirection:'row'}}>
-        <Text style={{flex:5}}>Men</Text><Switch onTintColor="pink" thumbTintColor="#ff5f64" value={this.state.showMale} onValueChange={ (showMale) => this.setState({ showMale })} />
-        </View>
-        <View style={{marginBottom:10,flexDirection:'row'}}>
-        <Text style={{flex:5}}>Women</Text><Switch onTintColor="pink" thumbTintColor="#ff5f64"  value={this.state.showFemale} onValueChange={ (showFemale) => this.setState({ showFemale})} />
-        </View>
-      </View><View style={{marginBottom:15}}>
+     
+      <View style={{marginBottom:15}}>
           <Text style={styles.heading}> Contact Us</Text>
           <Button  block style={styles.button} onPress={()=>Linking.openURL("https://www.help.tinder.com/hc/en-us")}>
             <Text style={styles.buttonText} uppercase={false}>Help & Support </Text>
@@ -138,7 +139,8 @@ const styles = StyleSheet.create({
     marginBottom:5,
     fontSize:18, 
     fontWeight:'bold',
-    paddingBottom:10
+    paddingBottom:10,
+    marginLeft:5
   },
   container: {
     flex: 1,
