@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Container, Content, Card, CardItem, Text, Body, View, Right, Left, Header, Title, Button, Icon, Switch, Radio  } from "native-base";
-import {Animated, StyleSheet, TextInput, TouchableOpacity, Linking } from "react-native";
+import {Animated, StyleSheet, TextInput, TouchableOpacity, Linking, AsyncStorage } from "react-native";
 import EIcon from 'react-native-vector-icons/Entypo';
 import ImagePicker from 'react-native-image-picker';
 export default class ProfileScreen extends Component {
@@ -10,12 +10,77 @@ export default class ProfileScreen extends Component {
       ImageSource: null,
       city:'',
       gender:'',
+      HASURA_AUTH_ID:'abc',
+      user_id:'',
     }
+    this.addUserData=this.addUserData.bind(this);
   }
 
-  addUserData=()=>{
-
+  async componentDidMount(){
+    
+    AsyncStorage.getItem('user_id').then((value)=>{
+      this.setState({'user_id':value})
+    }).done();
   }
+
+  addUserData=async()=>{
+    await AsyncStorage.getItem('HASURA_AUTH_TOKEN').then((value)=>{
+      this.setState({'HASURA_AUTH_ID':value})
+      console.log(this.state.HASURA_AUTH_ID);
+    });
+    await AsyncStorage.getItem('user_id').then((value)=>{
+      this.setState({'user_id':value})
+    });
+    console.log(this.state.user_id);
+    var url = "https://data.bleed71.hasura-app.io/v1/query";
+
+// If you have the auth token saved in offline storage, obtain it in async componentDidMount
+// var authToken = await AsyncStorage.getItem('HASURA_AUTH_TOKEN');
+// And use it in your headers
+// headers = { "Authorization" : "Bearer " + authToken }
+var requestOptions = {
+    "method": "POST",
+    "headers": {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer "+this.state.HASURA_AUTH_ID
+    }
+};
+console.log("after requestoptions");
+var body = {
+    "type": "update",
+    "args": {
+        "table": "User",
+        "where": {
+            "User_id": {
+                "$eq": this.state.user_id
+            }
+        },
+        "$set": {
+            "City": this.state.city,
+            "Gender": this.state.gender
+        }
+    }
+};
+
+requestOptions.body = JSON.stringify(body);
+
+fetch(url, requestOptions)
+.then(function(response) {
+  console.log("Got a response");
+  console.log(response);
+
+	return response.json();
+})
+.then(function(result) {
+	console.log(result);
+})
+.catch(function(error) {
+	console.log('Request Failed:' + error);
+});
+  }
+
+
+
 
   handleCityChange = city => {
     this.setState({

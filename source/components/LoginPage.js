@@ -2,8 +2,10 @@ import React, { Component } from "react";
 import { Container, Content, Card, CardItem, Text, Body,Right, Left, Header, Title, Button, Icon, Form, Item, Label, Input,  } from "native-base";
 import Animated, { TextInput } from "react-native";
 import Tabs from "./Tabs";
+import { connect } from 'react-redux';
 import { View, Alert } from 'react-native';
 import { trySignup, tryLogin } from './../hasuraApi';
+import {AsyncStorage }from 'react-native';
 
 const url = "https://auth.bleed71.hasura-app.io/v1/signup";
 export default class LoginPage extends React.Component{
@@ -14,7 +16,10 @@ export default class LoginPage extends React.Component{
               isLoggedIn : false,
               usernameTextBox : '',
               passwordTextBox : '',
-              usedId : '',
+              used_id : '',
+              city:'',
+              gender:'',
+              HASURA_AUTH_TOKEN:'',
           }
           this.handleSignupPressed=this.handleSignupPressed.bind(this);
       
@@ -29,14 +34,13 @@ export default class LoginPage extends React.Component{
             Alert.alert("Error", "Unauthorized, Invalid username or password")      
           }
         } else {
-          var respBody= await resp.json();
-          this.setState({isLoggedIn:true })  
+          this.setState({isLoggedIn:true }) ;
+          console.log("Login Response")
         }
       }
 
-    handleSignupPressed =()=>{
+handleSignupPressed =async()=>{
         
-
 var requestOptions = {
     "method": "POST",
     "headers": {
@@ -56,12 +60,14 @@ requestOptions.body = JSON.stringify(body);
 console.log("Auth Response ---------------------");
 
 fetch(url, requestOptions)
-.then((response)=> {
-  const auth_token= response.auth_token;
+.then(async(response)=> {
+ 
   if(response.status===200){
     
     this.setState({isLoggedIn: true});
     console.log("Auth");
+    console.log("Login Response")
+      
   }
   else{
     Alert.alert("Error", "Password too short / User already exists")
@@ -69,12 +75,20 @@ fetch(url, requestOptions)
   return response.json();
   
 })
-.then((result)=> {
+.then(async(result)=> {
   	// To save the auth token received to offline storage
-	// var authToken = result.auth_token
-	// AsyncStorage.setItem('HASURA_AUTH_TOKEN', authToken);
+    //var authToken = result.auth_token
+    console.log("Before auth token");
+    console.log(result.auth_token);
+    console.log(JSON.stringify(result.auth_token));
+    await AsyncStorage.setItem('HASURA_AUTH_TOKEN', JSON.stringify(result.auth_token));
+    this.setState({HASURA_AUTH_TOKEN: result.auth_token})
+    
+   console.log(this.state.user_id);
   console.log("result:"+result.username);
   console.log(JSON.stringify(result.hasura_id));
+  await AsyncStorage.setItem('user_id', JSON.stringify(result.hasura_id));
+    this.setState({'user_id': result.hasura_id})
       
       res_username= JSON.stringify(result.username);
       res_username1= res_username.substring(1,res_username.length-1);
@@ -148,6 +162,20 @@ fetch(url, requestOptions)
               passwordTextBox: passwordTextBox
           })
       }
+
+      handleCityChange = city => {
+        this.setState({
+            ...this.state,
+            city: city
+        })
+    }
+    
+    handleGenderChange = gender => {
+      this.setState({
+          ...this.state,
+          gender: gender
+      })
+    }
     
 
       render(){
@@ -172,6 +200,14 @@ fetch(url, requestOptions)
                 <Label>Password</Label>
                 <Input value={this.state.passwordTextbox} onChangeText={this.handlePasswordChange} secureTextEntry/>
               </Item>
+              <Item floatingLabel>
+                <Label>City</Label>
+                <Input value={this.state.city} onChangeText={this.handleCityChange}/>
+              </Item>
+              <Item floatingLabel>
+                <Label>Gender</Label>
+                <Input value={this.state.gender} onChangeText={this.handleGenderChange}/>
+              </Item>
             </Form>
             <View style = {{height:10}} />
             <Button block onPress={this.handleSignupPressed} >
@@ -186,5 +222,6 @@ fetch(url, requestOptions)
           );
       }
 }
+
 
     
