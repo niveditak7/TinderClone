@@ -12,15 +12,13 @@ export default class ProfileScreen extends Component {
       gender:'',
       HASURA_AUTH_ID:'abc',
       user_id:'',
+      username:'',
     }
     this.addUserData=this.addUserData.bind(this);
   }
 
-  async componentDidMount(){
+  async componentWillMount(){
     
-    AsyncStorage.getItem('user_id').then((value)=>{
-      this.setState({'user_id':value})
-    }).done();
   }
 
   addUserData=async()=>{
@@ -31,70 +29,80 @@ export default class ProfileScreen extends Component {
     await AsyncStorage.getItem('user_id').then((value)=>{
       this.setState({'user_id':value})
     });
+    await AsyncStorage.setItem('city', this.state.city);
+    console.log("Async storage city");
+    console.log(this.state.city);
+    await AsyncStorage.setItem('gender', this.state.gender);
+    console.log("Async storage gender");
+    console.log(this.state.gender);
+    
     console.log(this.state.user_id);
+    console.log(this.state.username);
+
     var url = "https://data.bleed71.hasura-app.io/v1/query";
 
 // If you have the auth token saved in offline storage, obtain it in async componentDidMount
 // var authToken = await AsyncStorage.getItem('HASURA_AUTH_TOKEN');
 // And use it in your headers
 // headers = { "Authorization" : "Bearer " + authToken }
-var requestOptions = {
-    "method": "POST",
-    "headers": {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer "+this.state.HASURA_AUTH_ID
-    }
-};
-console.log("after requestoptions");
-var body = {
-    "type": "update",
-    "args": {
-        "table": "User",
-        "where": {
+    var requestOptions = {
+        "method": "POST",
+        "headers": {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer "+this.state.HASURA_AUTH_ID
+          }
+    };
+    console.log("after requestoptions");
+    var body = {
+        "type": "update",
+        "args": {
+          "table": "User",
+          "where": {
             "User_id": {
                 "$eq": this.state.user_id
             }
-        },
+          },
         "$set": {
             "City": this.state.city,
             "Gender": this.state.gender
         }
-    }
-};
+      }
+    };
 
-requestOptions.body = JSON.stringify(body);
+    requestOptions.body = JSON.stringify(body);
 
-fetch(url, requestOptions)
-.then(function(response) {
-  console.log("Got a response");
-  console.log(response);
-
-	return response.json();
-})
-.then(function(result) {
-	console.log(result);
-})
-.catch(function(error) {
-	console.log('Request Failed:' + error);
-});
+    fetch(url, requestOptions)
+    .then(async(response) =>{
+        console.log("Got a response");
+        console.log(response);
+        return response.json();
+    })
+    .then(async(result)=> {
+      console.log("Login Result");
+	      console.log(result);
+    })
+    .catch(function(error) {
+	      console.log('Request Failed:' + error);
+    });
   }
 
+  handleLogout=async()=>{
 
-
+  }
 
   handleCityChange = city => {
     this.setState({
         ...this.state,
         city: city
     })
-}
+  }
 
-handleGenderChange = gender => {
-  this.setState({
+  handleGenderChange = gender => {
+    this.setState({
       ...this.state,
       gender: gender
-  })
-}
+    })
+  }
   
   selectPhotoTapped() {
     const options = {
@@ -106,7 +114,7 @@ handleGenderChange = gender => {
       }
     };
 
-    ImagePicker.showImagePicker(options, (response) => {
+  ImagePicker.showImagePicker(options, (response) => {
       console.log('Response = ', response);
 
       if (response.didCancel) {
@@ -136,54 +144,57 @@ render() {
   return (
       <Container>
         <Content>
-        <View style={{margin:20}}>
-          <View style={{alignItems:'center', justifyContent:'center' }}>
-            <TouchableOpacity onPress={this.selectPhotoTapped.bind(this)}>
-              <View style={styles.ImageContainer}>
-                { this.state.ImageSource === null ? <EIcon style={{fontSize:45, color:'white'}} name='user'/> :
-                <Image style={styles.ImageContainer} source={this.state.ImageSource} />
-                }
-              </View>
-            </TouchableOpacity>
-          </View>
-          <View style={{justifyContent:'center',alignItems:'center',padding: 5}}>
-          <Text style={{fontWeight:'bold', fontSize: 25}}>Chelsea</Text></View>
-        
-      <View style={{marginBottom:15,backgroundColor:'white',padding:15}}>
-      
-        <Text style={[styles.heading,{color:'#ff5f64'}]}>Discovery Settings</Text>
-        <TextInput underlineColorAndroid= 'transparent'
-          placeholder="Enter City"
-          placeholderTextColor="gray"
-          style={styles.textInput}
-          value={this.state.city} onChangeText={this.handleCityChange}
-        />
-        <TextInput underlineColorAndroid= 'transparent'
-          placeholder="Enter Gender"
-          placeholderTextColor="gray"
-          style={styles.textInput}
-          value={this.state.gender} onChangeText={this.handleGenderChange}
-        /><View style={{alignItems:'center', justifyContent:'center'}}>
-         <Button style={{backgroundColor:'#ff5f64' }} onPress={this.addUserData} >
-              <Text> Sign up </Text>
-            </Button>
+          <View style={{margin:20}}>
+            <View style={{alignItems:'center', justifyContent:'center' }}>
+              <TouchableOpacity onPress={this.selectPhotoTapped.bind(this)}>
+                <View style={styles.ImageContainer}>
+                  { this.state.ImageSource === null ? <EIcon style={{fontSize:45, color:'white'}} name='user'/> :
+                    <Image style={styles.ImageContainer} source={this.state.ImageSource} />
+                  }
+                </View>
+              </TouchableOpacity>
+            </View>
+            <View style={{justifyContent:'center',alignItems:'center',padding: 15}}>
+              <Text style={{fontWeight:'bold', fontSize: 25}}>{this.state.username}</Text>
             </View>
         
-      </View>
-     
-      <View style={{marginBottom:15}}>
-          <Text style={styles.heading}> Contact Us</Text>
-          <Button  block style={styles.button} onPress={()=>Linking.openURL("https://www.help.tinder.com/hc/en-us")}>
-            <Text style={styles.buttonText} uppercase={false}>Help & Support </Text>
-          </Button><Text /><Text /><Text />
-        <Button block style={styles.button} >
-          <Text style={styles.buttonText}>Logout</Text>
-        </Button>
-        </View></View></Content>
+            <View style={{marginBottom:15,backgroundColor:'white',padding:12}}>
+              <Text style={[styles.heading,{color:'#ff5f64', marginBottom:10, paddingLeft:15}]}>Discovery Settings</Text>
+              <TextInput underlineColorAndroid= 'transparent'
+                  placeholder="Enter City"
+                  placeholderTextColor="gray"
+                  style={styles.textInput}
+                  value={this.state.city} onChangeText={this.handleCityChange}
+              />
+              <TextInput underlineColorAndroid= 'transparent'
+                  placeholder="Enter Gender"
+                  placeholderTextColor="gray"
+                  style={styles.textInput}
+                  value={this.state.gender} onChangeText={this.handleGenderChange}
+              />
+              <View style={{alignItems:'center', justifyContent:'center', padding:15, position:"relative"}}>
+                  <Button style={{backgroundColor:'#ff5f64' , height:40}} onPress={this.addUserData} >
+                      <Text> Set Details </Text>
+                  </Button>
+              </View>
+            </View>
+            <View style={{marginBottom:15, backgroundColor:'white', padding:25}}>
+              <Text style={[styles.heading,{paddingBottom:10, color:'#ff5f64'}]}> Contact Us</Text>
+              <Button  block style={styles.button} onPress={()=>Linking.openURL("https://www.help.tinder.com/hc/en-us")}>
+              <Text style={styles.buttonText} uppercase={false}>Help & Support </Text>
+              </Button><Text /><Text /><Text />
+              <Button block style={styles.button} >
+                  <Text style={styles.buttonText}>Logout</Text>
+              </Button>
+            </View>
+          </View>
+        </Content>
       </Container>
     );
   }
 }
+
+
 const styles = StyleSheet.create({
   button: {
     alignItems: 'center',
@@ -201,11 +212,8 @@ const styles = StyleSheet.create({
     paddingLeft:15,
   },
   heading:{
-    marginBottom:5,
     fontSize:18, 
     fontWeight:'bold',
-    paddingBottom:10,
-    marginLeft:5
   },
   container: {
     flex: 1,
