@@ -86,7 +86,22 @@ export default class ProfileScreen extends Component {
     });
   }
 
-  handleLogout=async()=>{
+   handleLogout=async()=>{
+    console.log("in login");
+    await AsyncStorage.getItem('HASURA_AUTH_TOKEN').then((value)=>{
+      this.setState({'HASURA_AUTH_ID':value})
+      console.log(this.state.HASURA_AUTH_ID);
+    });
+    fetch("https://auth.bleed71.hasura-app.io/APIEP_Logout/"+this.state.HASURA_AUTH_ID)
+.then(function(response) {
+	return response.json();
+})
+.then(function(result) {
+	console.log(result);
+})
+.catch(function(error) {
+	console.log('Request Failed:' + error);
+});
 
   }
 
@@ -183,7 +198,7 @@ render() {
               <Button  block style={styles.button} onPress={()=>Linking.openURL("https://www.help.tinder.com/hc/en-us")}>
               <Text style={styles.buttonText} uppercase={false}>Help & Support </Text>
               </Button><Text /><Text /><Text />
-              <Button block style={styles.button} >
+              <Button block style={styles.button} onPress={this.handleLogout} >
                   <Text style={styles.buttonText}>Logout</Text>
               </Button>
             </View>

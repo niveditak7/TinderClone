@@ -36,26 +36,86 @@ class SwipeScreen extends Component {
       HASURA_AUTH_ID:'',
       city:'',
       gender:'',
+      currentUser:'',
     };
     this.fetchInfo.bind(this);
     this.onLike.bind(this);
-    this.onDisLike.bind(this);
+    this.onButtonLike.bind(this);
+    this.onDislike.bind(this);
+  //  this.displayCards.bind(this);
   }
 
   
 
-  onLike(){
-   console.log(this.mr)
+  onLike=async(item)=>{
+    console.log("inLike");
+   Alert.alert(""+item.User_id)
+   console.log(item.User_id)
+  
+   //this.setState({currentUser:item.User_id})
+  // console.log(this.state.currentUser);
+   console.log(this.state.user_id);
+   console.log(this.state.HASURA_AUTH_ID);
+  fetch("https://app.bleed71.hasura-app.io/APIEP_Likes/"+item.User_id+"/"+this.state.user_id+"/"+this.state.HASURA_AUTH_ID)
+   .then(async(response) =>{
+    return response.json();
+  })
+  .then(async(result)=> {
+    console.log(result);
+  })
+  .catch(function(error) {
+    console.log('Request Failed:' + error);
+  });
   }
 
-  onDisLike(){
+  onButtonLike=(item)=>{
     
+  // this.setState({currentUser:item.User_id})
+    this._deckSwiper._root.swipeLeft()
+   }
+
+  onDislike=(item)=>{
+   Alert.alert(""+item.User_id)
+   this.setState({currentUser:item.User_id})
   }
-  
+
+  /*displayCards=(item)=>{
+    var userid=item.User_id;
+  //this.setState({currentUser:userid});
+  console.log("in display");
+    console.log(this.state.currentUser);
+    
+    return(
+<Card style={{ elevation: 3 }}>
+                  <CardItem>
+                    <Left>
+                      <Text>Hi</Text>
+                        <Body>
+                          <Text>
+       
+                          {item.User_id}
+                          </Text>
+                          <Text note>NativeBase</Text>
+                        </Body>
+                      </Left>
+                    </CardItem>
+                    <CardItem cardBody>
+                    </CardItem>
+                    <CardItem>
+                      <IconNB name={"ios-heart"} style={{ color: "#ED4A6A" }} />
+                        <Text>
+                          {item.User_name}
+                        </Text>
+                    </CardItem>
+                  </Card>
+    );
+  }
+*/
 
   fetchInfo=async()=>{
-    console.log(this.state.cards);
-    console.log("Cards");
+    console.log("in fetchInfo");
+    console.log("Cards:"+this.state.cards);
+   
     await AsyncStorage.getItem('HASURA_AUTH_TOKEN').then((value)=>{
       this.setState({'HASURA_AUTH_ID':value})
       console.log("SwipeScreen");
@@ -141,6 +201,7 @@ fetch(url, requestOptions)
    
    console.log("Inrednder");
    console.log(this.state.cards);
+   //console.log(this.state.currentUser);
     
    
     if(this.state.cards.length>1){
@@ -157,7 +218,9 @@ fetch(url, requestOptions)
                   <Text>That's all for now.</Text>
                 </View>}
                 onSwipeRight={this.onLike}
-              renderItem={item =>
+                onSwipeLeft={this.onDislike}
+              renderItem={
+                item =>
                 <Card style={{ elevation: 3 }}>
                   <CardItem>
                     <Left>
@@ -178,7 +241,10 @@ fetch(url, requestOptions)
                           {item.User_name}
                         </Text>
                     </CardItem>
-                  </Card>}
+                  </Card>
+
+              }
+
               /> 
             </View>
             <View  style={{
@@ -200,12 +266,13 @@ fetch(url, requestOptions)
             <Icon style={{fontSize:22, color:'blue'}} name="ios-star" />
           </Button>
           
-          <Button style={[styles.button,{height:60,width:60}]} onPress={() => this._deckSwiper._root.swipeRight()}>
+          <Button style={[styles.button,{height:60,width:60}]} onPress={this.onButtonLike}>
             <Icon name="heart" style={{color:'rgb(69,169,76)',fontSize:30}} />
           </Button>
           <Button rounded style={styles.button} onPress={() => this._deckSwiper._root.swipeLeft()}>
             <Icon style={{fontSize:30, color:'purple'}} name="ios-flash" />
           </Button>
+          <Text>{this.state.currentUser}</Text>
         </View>
         </View>
         </Container>

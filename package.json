@@ -10,6 +10,7 @@
     "native-base": "^2.3.7",
     "react": "16.0.0",
     "react-native": "0.50.4",
+    "react-native-deck-swiper": "^1.4.7",
     "react-native-fontawesome": "^5.7.0",
     "react-native-image-picker": "^0.26.7",
     "react-native-vector-icons": "^4.4.2",

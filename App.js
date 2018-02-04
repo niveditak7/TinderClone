@@ -15,7 +15,6 @@ import {
 import { createStore } from 'redux';
 import { Provider } from 'react-redux';
 
-import Index from './source/components/Index';
 import reducer from './source/reducer';
 const store = createStore(reducer);
 import LoginPage from "./source/components/LoginPage";

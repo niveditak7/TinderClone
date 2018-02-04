@@ -26,28 +26,55 @@ export default class LoginPage extends React.Component{
         }
 
     handleLoginPressed = async () => {
-        fetch("https://api.burled79.hasura-app.io/APIEP_Login_Username/"+this.state.usernameTextBox+"/"+this.state.passwordTextBox)
+        var url = "https://auth.bleed71.hasura-app.io/v1/login";
+
+        var requestOptions = {
+            "method": "POST",
+            "headers": {
+                "Content-Type": "application/json"
+            }
+        };
+        
+        var body = {
+            "provider": "username",
+            "data": {
+                "username":this.state.usernameTextBox,
+                "password": this.state.passwordTextBox
+            }
+        };
+        
+        requestOptions.body = JSON.stringify(body);
+        console.log("Login response---------");
+        fetch(url, requestOptions)
         .then(async(response)=> {
             if(response.status===200){
                 this.setState({isLoggedIn: true});
                 console.log("Login Response")
             }
         else{
-            if (resp.status === 504) {
-                Alert.alert("Network Error", "Check your internet connection" )
-              } 
-              else{
             Alert.alert("Error", "Password too short / User already exists")
-              }
             }
             return response.json();
         })
-        .then((result) =>{
-            console.log(result);
+        .then(async(result)=> {
+            console.log("Result:"+result);
+            // To save the auth token received to offline storage
+            // var authToken = result.auth_token
+            // AsyncStorage.setItem('HASURA_AUTH_TOKEN', authToken);
+            console.log("Before auth token");
+            console.log(result.auth_token);
+            console.log(JSON.stringify(result.auth_token));
+            await AsyncStorage.setItem('HASURA_AUTH_TOKEN', JSON.stringify(result.auth_token));
+            this.setState({HASURA_AUTH_TOKEN: result.auth_token})
+            console.log(this.state.user_id);
+            console.log("result:"+result.username);
+            console.log(JSON.stringify(result.hasura_id));
+            await AsyncStorage.setItem('user_id', JSON.stringify(result.hasura_id));
+            this.setState({'user_id': result.hasura_id})
+            
         })
-  
         .catch(function(error) {
-        console.log('Request Failed:' + error);
+            console.log('Request Failed:' + error);
         });
       }
 
