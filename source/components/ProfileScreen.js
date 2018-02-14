@@ -3,6 +3,8 @@ import { Container, Content, Card, CardItem, Text, Body, View, Right, Left, Head
 import {Animated, StyleSheet, TextInput, TouchableOpacity, Linking, AsyncStorage } from "react-native";
 import EIcon from 'react-native-vector-icons/Entypo';
 import ImagePicker from 'react-native-image-picker';
+import LoginPage from './LoginPage';
+
 export default class ProfileScreen extends Component {
   constructor(props){
     super(props);
@@ -13,13 +15,21 @@ export default class ProfileScreen extends Component {
       HASURA_AUTH_ID:'abc',
       user_id:'',
       username:'',
+      isLoggedIn:true,
     }
     this.addUserData=this.addUserData.bind(this);
   }
+  
+
+  componentWillUpdate(){
+    console.log("Update profile screen");
+  }
 
   async componentWillMount(){
-    
+    console.log("ProfileScreen");
   }
+
+  
 
   addUserData=async()=>{
     await AsyncStorage.getItem('HASURA_AUTH_TOKEN').then((value)=>{
@@ -30,10 +40,8 @@ export default class ProfileScreen extends Component {
       this.setState({'user_id':value})
     });
     await AsyncStorage.setItem('city', this.state.city);
-    console.log("Async storage city");
     console.log(this.state.city);
     await AsyncStorage.setItem('gender', this.state.gender);
-    console.log("Async storage gender");
     console.log(this.state.gender);
     
     console.log(this.state.user_id);
@@ -92,16 +100,33 @@ export default class ProfileScreen extends Component {
       this.setState({'HASURA_AUTH_ID':value})
       console.log(this.state.HASURA_AUTH_ID);
     });
-    fetch("https://auth.bleed71.hasura-app.io/APIEP_Logout/"+this.state.HASURA_AUTH_ID)
-.then(function(response) {
-	return response.json();
-})
-.then(function(result) {
-	console.log(result);
-})
-.catch(function(error) {
-	console.log('Request Failed:' + error);
-});
+    
+    var url = "https://app.bleed71.hasura-app.io/APIEP_Logout";
+    var requestOptions = {
+        "method": "POST",
+        "headers": {
+            "Content-Type": "application/json"
+        }
+      };
+      var body = {
+          "auth_key":this.state.HASURA_AUTH_ID
+          
+    };
+    requestOptions.body = JSON.stringify(body);
+  
+    fetch(url,requestOptions)
+  .then(function(response) {
+      return response.json();
+  })
+  .then(function(result) {
+      console.log(result);
+      })
+   .catch(function(error) {
+      
+              console.log('Request Failed locally  6' + error);
+          });
+      this.setState({isLoggedIn:false});
+      
 
   }
 
@@ -143,6 +168,25 @@ export default class ProfileScreen extends Component {
       }
       else {
         let source = { uri: response.uri };
+        var url = "https://api.boat40.hasura-app.io/APIEP_PP";
+
+        const data = new FormData();
+        data.append('user_auth_token', auth_token); // add auth token
+        data.append('photo', {
+          uri: source.uri,
+          type: 'image/jpeg', // or photo.type
+          name: 'testPhotoName'
+        });
+        fetch(url, {
+          method: 'post',
+          body: data
+        }).then(res => {
+          console.log(res)
+        })
+        .catch(function(error) {
+          console.log('Request Failed :' + error);
+          return error;
+        });;
 
         // You can also display the image using data:
         // let source = { uri: 'data:image/jpeg;base64,' + response.data };
@@ -156,6 +200,7 @@ export default class ProfileScreen extends Component {
     });
   }
 render() {
+  console.log(this.props.navigation)
   return (
       <Container>
         <Content>
@@ -198,15 +243,17 @@ render() {
               <Button  block style={styles.button} onPress={()=>Linking.openURL("https://www.help.tinder.com/hc/en-us")}>
               <Text style={styles.buttonText} uppercase={false}>Help & Support </Text>
               </Button><Text /><Text /><Text />
-              <Button block style={styles.button} onPress={this.handleLogout} >
+              <Button block style={styles.button} onPress={()=>this.props.navigation.goBack(null)} >
                   <Text style={styles.buttonText}>Logout</Text>
               </Button>
             </View>
           </View>
         </Content>
       </Container>
+
     );
   }
+  
 }
 
 

@@ -56,7 +56,9 @@ class SwipeScreen extends Component {
   // console.log(this.state.currentUser);
    console.log(this.state.user_id);
    console.log(this.state.HASURA_AUTH_ID);
-  fetch("https://app.bleed71.hasura-app.io/APIEP_Likes/"+item.User_id+"/"+this.state.user_id+"/"+this.state.HASURA_AUTH_ID)
+   var auth_token=JSON.parse(this.state.HASURA_AUTH_ID);
+   console.log(auth_token);
+  fetch("https://app.bleed71.hasura-app.io/APIEP_Likes/"+item.User_id+"/"+this.state.user_id+"/"+auth_token)
    .then(async(response) =>{
     return response.json();
   })

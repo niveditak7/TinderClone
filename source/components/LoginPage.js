@@ -7,7 +7,7 @@ import { View, Alert } from 'react-native';
 import { trySignup, tryLogin } from './../hasuraApi';
 import {AsyncStorage }from 'react-native';
 
-const url = "https://auth.bleed71.hasura-app.io/v1/signup";
+//const url = "https://auth.bleed71.hasura-app.io/v1/signup";
 export default class LoginPage extends React.Component{
 
     constructor(props){
@@ -26,7 +26,7 @@ export default class LoginPage extends React.Component{
         }
 
     handleLoginPressed = async () => {
-        var url = "https://auth.bleed71.hasura-app.io/v1/login";
+        var url = "https://app.bleed71.hasura-app.io/APIEP_Login_Username";
 
         var requestOptions = {
             "method": "POST",
@@ -45,11 +45,12 @@ export default class LoginPage extends React.Component{
         
         requestOptions.body = JSON.stringify(body);
         console.log("Login response---------");
-        fetch(url, requestOptions)
+        fetch(url,requestOptions)
         .then(async(response)=> {
             if(response.status===200){
                 this.setState({isLoggedIn: true});
-                console.log("Login Response")
+                console.log("Login Response");
+                console.log(response)
             }
         else{
             Alert.alert("Error", "Password too short / User already exists")
@@ -61,16 +62,25 @@ export default class LoginPage extends React.Component{
             // To save the auth token received to offline storage
             // var authToken = result.auth_token
             // AsyncStorage.setItem('HASURA_AUTH_TOKEN', authToken);
-            console.log("Before auth token");
-            console.log(result.auth_token);
-            console.log(JSON.stringify(result.auth_token));
-            await AsyncStorage.setItem('HASURA_AUTH_TOKEN', JSON.stringify(result.auth_token));
-            this.setState({HASURA_AUTH_TOKEN: result.auth_token})
-            console.log(this.state.user_id);
-            console.log("result:"+result.username);
-            console.log(JSON.stringify(result.hasura_id));
-            await AsyncStorage.setItem('user_id', JSON.stringify(result.hasura_id));
-            this.setState({'user_id': result.hasura_id})
+            
+            console.log("Auth token:"+result[0].auth_token);
+            await AsyncStorage.setItem('HASURA_AUTH_TOKEN', result[0].auth_token);
+            this.setState({HASURA_AUTH_TOKEN: result[0].auth_token});
+
+            console.log("Userid:"+result[0].hasura_id);
+            await AsyncStorage.setItem('user_id',JSON.stringify(result[0].hasura_id));
+            this.setState({'user_id': JSON.stringify(result.hasura_id)})
+            
+            console.log("Username:"+result[0].username);
+            await AsyncStorage.setItem('username',JSON.stringify(result[0].username));
+
+            console.log("Gender:"+(result[1].Gender))
+            await AsyncStorage.setItem('gender',(result[1].Gender));
+
+            
+            console.log("City:"+(result[1].City))
+            await AsyncStorage.setItem('city',(result[1].City));
+
             
         })
         .catch(function(error) {
@@ -79,6 +89,7 @@ export default class LoginPage extends React.Component{
       }
 
     handleSignupPressed =async()=>{
+        url = "https://api.boat40.hasura-app.io/APIEP_Signup_Username";
         var requestOptions = {
             "method": "POST",
             "headers": {

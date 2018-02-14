@@ -18,12 +18,13 @@ import { Provider } from 'react-redux';
 import reducer from './source/reducer';
 const store = createStore(reducer);
 import LoginPage from "./source/components/LoginPage";
+import StackNav from './source/components/StackNav';
 
 export default class App extends Component {
   render() {
     return (
       <Container>
-        <LoginPage />
+        <StackNav />
         </Container>
     );
   }

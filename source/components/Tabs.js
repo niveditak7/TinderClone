@@ -10,21 +10,21 @@ import ProfileScreen from "./ProfileScreen";
 const Tabs = TabNavigator ({
   ProfileScreen: {
     screen: ProfileScreen,
-    navigationOptions:({navigation})=>({
+    navigationOptions:{
       title: 'ProfileScreen',
       tabBarIcon: ({ tintColor }) => (
         <FAIcon name="user-circle" style={{color: tintColor, fontSize:20}}/>
       ),
-    })
+    }
   },
   SwipeScreen: {
     screen: SwipeScreen,
-    navigationOptions:({navigation})=>({
+    navigationOptions:{
       title: 'SwipeScreen',
       tabBarIcon: ({ tintColor }) => (
         <Icon name="flame" style={{color: tintColor, fontSize:30}}/>
       ),
-    })
+    }
   },
   MessagesScreen: {
     screen: MessagesScreen,
