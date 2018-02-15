@@ -9,10 +9,8 @@ const StackNav = StackNavigator ({
     LoginPage:{screen: LoginPage},
     Tabs:{ screen: Tabs },
     ProfileScreen:{ screen: ProfileScreen},
-    
-    
-},
-{
+    },
+    {
    headerMode:'none',
 });
 

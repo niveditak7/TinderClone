@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import { Container, Content, Card, CardItem, Text, Body, View, Right, Left, Header, Title, Button, Icon, Switch, Radio  } from "native-base";
-import {Animated, StyleSheet, TextInput, TouchableOpacity, Linking, AsyncStorage } from "react-native";
+import {Animated, StyleSheet, TextInput, TouchableOpacity, Linking, AsyncStorage, Image } from "react-native";
 import EIcon from 'react-native-vector-icons/Entypo';
 import ImagePicker from 'react-native-image-picker';
 import LoginPage from './LoginPage';
+import {NavigationActions} from 'react-navigation';
 
 export default class ProfileScreen extends Component {
   constructor(props){
@@ -19,16 +20,6 @@ export default class ProfileScreen extends Component {
     }
     this.addUserData=this.addUserData.bind(this);
   }
-  
-
-  componentWillUpdate(){
-    console.log("Update profile screen");
-  }
-
-  async componentWillMount(){
-    console.log("ProfileScreen");
-  }
-
   
 
   addUserData=async()=>{
@@ -125,8 +116,16 @@ export default class ProfileScreen extends Component {
       
               console.log('Request Failed locally  6' + error);
           });
-      this.setState({isLoggedIn:false});
-      
+        this.props.navigation.goBack(null);
+     /* this.props.navigation.dispatch({
+        type:NavigationActions.NAVIGATE,
+        routeName:'LoginPage',
+        action:{
+          type: NavigationActions.RESET,
+          index:0,
+          actions:[{ type:NavigationActions.NAVIGATE, routeName:'LoginPage'}]
+        }
+    })*/
 
   }
 
@@ -169,7 +168,7 @@ export default class ProfileScreen extends Component {
       else {
         let source = { uri: response.uri };
         var url = "https://api.boat40.hasura-app.io/APIEP_PP";
-
+        var auth_token = "6868272c7b4e8efab9d8a8b3cb864a651cf8c6ca492b192c"
         const data = new FormData();
         data.append('user_auth_token', auth_token); // add auth token
         data.append('photo', {
@@ -243,7 +242,7 @@ render() {
               <Button  block style={styles.button} onPress={()=>Linking.openURL("https://www.help.tinder.com/hc/en-us")}>
               <Text style={styles.buttonText} uppercase={false}>Help & Support </Text>
               </Button><Text /><Text /><Text />
-              <Button block style={styles.button} onPress={()=>this.props.navigation.goBack(null)} >
+              <Button block style={styles.button} onPress={this.handleLogout} >
                   <Text style={styles.buttonText}>Logout</Text>
               </Button>
             </View>

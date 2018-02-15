@@ -2,9 +2,7 @@ import React, { Component } from "react";
 import { Container, Content, Card, CardItem, Text, Body,Right, Left, Header, Title, Button, Icon, Form, Item, Label, Input,  } from "native-base";
 import Animated, { TextInput } from "react-native";
 import Tabs from "./Tabs";
-import { connect } from 'react-redux';
 import { View, Alert } from 'react-native';
-import { trySignup, tryLogin } from './../hasuraApi';
 import {AsyncStorage }from 'react-native';
 
 //const url = "https://auth.bleed71.hasura-app.io/v1/signup";
@@ -24,6 +22,7 @@ export default class LoginPage extends React.Component{
           this.handleSignupPressed=this.handleSignupPressed.bind(this);
       
         }
+
 
     handleLoginPressed = async () => {
         var url = "https://app.bleed71.hasura-app.io/APIEP_Login_Username";
@@ -81,7 +80,7 @@ export default class LoginPage extends React.Component{
             console.log("City:"+(result[1].City))
             await AsyncStorage.setItem('city',(result[1].City));
 
-            
+            this.props.navigation.navigate("Tabs");
         })
         .catch(function(error) {
             console.log('Request Failed:' + error);
@@ -89,7 +88,7 @@ export default class LoginPage extends React.Component{
       }
 
     handleSignupPressed =async()=>{
-        url = "https://api.boat40.hasura-app.io/APIEP_Signup_Username";
+        url = "https://app.bleed71.hasura-app.io/APIEP_Signup_Username";
         var requestOptions = {
             "method": "POST",
             "headers": {
@@ -111,8 +110,10 @@ export default class LoginPage extends React.Component{
         fetch(url, requestOptions)
         .then(async(response)=> {
              if(response.status===200){
-                    this.setState({isLoggedIn: true});
-                    console.log("Login Response")
+                  this.setState({isLoggedIn: true});
+                  console.log(response);
+                   this.props.navigation.navigate("Tabs");
+                    
                 }
             else{
                 Alert.alert("Error", "Password too short / User already exists")
@@ -125,7 +126,7 @@ export default class LoginPage extends React.Component{
             console.log("Before auth token");
             console.log(result.auth_token);
             console.log(JSON.stringify(result.auth_token));
-            await AsyncStorage.setItem('HASURA_AUTH_TOKEN', JSON.stringify(result.auth_token));
+            await AsyncStorage.setItem('HASURA_AUTH_TOKEN', result.auth_token);
             this.setState({HASURA_AUTH_TOKEN: result.auth_token})
             console.log(this.state.user_id);
             console.log("result:"+result.username);
@@ -169,8 +170,9 @@ export default class LoginPage extends React.Component{
             .then(function(response) {
                 return response.json();
             })
-            .then((result) =>{
+            .then(async(result) =>{
                 console.log(result);
+                
             })
       
             .catch(function(error) {
@@ -197,13 +199,14 @@ export default class LoginPage extends React.Component{
     }
 
     render(){
-        if(this.state.isLoggedIn === true){
+     /*   if(this.state.isLoggedIn === true){
             return (
                <Container>
                  <Tabs />
                  </Container>
             );
           }
+          */
           return(
 
       <Container style={{backgroundColor:'white', padding:30}}>

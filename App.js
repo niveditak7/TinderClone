@@ -12,11 +12,7 @@ import {
   Text,
   View
 } from 'react-native';
-import { createStore } from 'redux';
-import { Provider } from 'react-redux';
 
-import reducer from './source/reducer';
-const store = createStore(reducer);
 import LoginPage from "./source/components/LoginPage";
 import StackNav from './source/components/StackNav';
 
