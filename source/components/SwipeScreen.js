@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Image,  StyleSheet, Dimensions, Alert, AsyncStorage } from "react-native";
+import { Image,  StyleSheet, Dimensions, Alert, AsyncStorage, RefreshControl } from "react-native";
 import {
   Container,
   Header,
@@ -20,12 +20,7 @@ import EIcon from 'react-native-vector-icons/Entypo';
 import FAIcon from 'react-native-vector-icons/FontAwesome';
 const deviceWidth = Dimensions.get("window").width;
 const deviceHeight = Dimensions.get('window').height;
-
-const cardOne = require("./swiper-1.png");
-const cardTwo = require("./swiper-2.png");
-const cardThree = require("./swiper-3.png");
-const cardFour = require("./swiper-4.png");
-
+const logo = require("./tinderlogo.jpg");
 class SwipeScreen extends Component {
   
   constructor(props){
@@ -37,26 +32,37 @@ class SwipeScreen extends Component {
       city:'',
       gender:'',
       currentUser:'',
+      refreshing: false,
+      prevItem:'',
+      undon:0,
     };
     this.fetchInfo.bind(this);
     this.onLike.bind(this);
     this.onButtonLike.bind(this);
     this.onDislike.bind(this);
-  //  this.displayCards.bind(this);
+ this.displayCards.bind(this);
+ this.undo.bind(this);
+ this._onRefresh.bind(this);
   }
 
-  
+  componentDidMount=async()=>{
+    console.log("SwipeScreen mounted!!");
+    this.fetchInfo();
+  }
+
+ // componentDidUpdate(){
+ //   console.log("SwipeScreen updated ...!");
+ // }
 
   onLike=async(item)=>{
     console.log("inLike");
-   Alert.alert(""+item.User_id)
    console.log(item.User_id)
   
    //this.setState({currentUser:item.User_id})
   // console.log(this.state.currentUser);
    console.log(this.state.user_id);
    console.log(this.state.HASURA_AUTH_ID);
-   var auth_token=JSON.parse(this.state.HASURA_AUTH_ID);
+   var auth_token=this.state.HASURA_AUTH_ID;
    console.log(auth_token);
   fetch("https://app.bleed71.hasura-app.io/APIEP_Likes/"+item.User_id+"/"+this.state.user_id+"/"+auth_token)
    .then(async(response) =>{
@@ -64,6 +70,9 @@ class SwipeScreen extends Component {
   })
   .then(async(result)=> {
     console.log(result);
+    console.log(result.affected_rows);
+    if(result.affected_rows==1)
+    Alert.alert("Its a Match!");
   })
   .catch(function(error) {
     console.log('Request Failed:' + error);
@@ -71,17 +80,42 @@ class SwipeScreen extends Component {
   }
 
   onButtonLike=(item)=>{
-    
+    this.onLike(this._deckSwiper._root.state.selectedItem);
   // this.setState({currentUser:item.User_id})
+  this.setState({prevItem:this._deckSwiper._root.state.selectedItem})
+    this._deckSwiper._root.swipeRight()
+   }
+
+   onButtonDislike=(item)=>{
+    this.onDisike(this._deckSwiper._root.state.selectedItem);
+  // this.setState({currentUser:item.User_id})
+  this.setState({prevItem:this._deckSwiper._root.state.selectedItem})
     this._deckSwiper._root.swipeLeft()
    }
 
   onDislike=(item)=>{
    Alert.alert(""+item.User_id)
-   this.setState({currentUser:item.User_id})
+  // this.setState({currentUser:item.User_id})
+   console.log("hgfd");
+  // this.setState({prevItem:this._deckSwiper._root.state.selectedItem})
   }
 
-  /*displayCards=(item)=>{
+  undo=()=>{
+    var prev=this.state.prevItem;
+   // var i=this.state.undon;
+   // this.setState({undon:i+1});
+    console.log("jnukhnk")
+    console.log(prev);
+console.log(  this.state.cards.indexOf(prev))
+var n=this.state.cards.indexOf(prev);
+this._deckSwiper._root.state.selectedItem=this.state.cards[n-1];
+console.log(this._deckSwiper._root.state.selectedItem)
+this._deckSwiper._root.swipeLeft();
+this.displayCards(prev)
+
+  }
+
+  displayCards=(item)=>{
     var userid=item.User_id;
   //this.setState({currentUser:userid});
   console.log("in display");
@@ -89,19 +123,8 @@ class SwipeScreen extends Component {
     
     return(
 <Card style={{ elevation: 3 }}>
-                  <CardItem>
-                    <Left>
-                      <Text>Hi</Text>
-                        <Body>
-                          <Text>
-       
-                          {item.User_id}
-                          </Text>
-                          <Text note>NativeBase</Text>
-                        </Body>
-                      </Left>
-                    </CardItem>
                     <CardItem cardBody>
+                    <Image style={{ height: 300, flex: 1 }} source={{uri:'https://filestore.bleed71.hasura-app.io/v1/file/'+item.fileid}} />
                     </CardItem>
                     <CardItem>
                       <IconNB name={"ios-heart"} style={{ color: "#ED4A6A" }} />
@@ -112,11 +135,10 @@ class SwipeScreen extends Component {
                   </Card>
     );
   }
-*/
 
   fetchInfo=async()=>{
     console.log("in fetchInfo");
-    console.log("Cards:"+this.state.cards);
+    console.log("Cards:"+this.state.cards.length);
    
     await AsyncStorage.getItem('HASURA_AUTH_TOKEN').then((value)=>{
       this.setState({'HASURA_AUTH_ID':value})
@@ -134,52 +156,14 @@ class SwipeScreen extends Component {
       this.setState({'gender':value})
       console.log(this.state.gender);
     });
-    var url = "https://data.bleed71.hasura-app.io/v1/query";
+    var url = "https://app.bleed71.hasura-app.io/APIEP_UserDetailsforSwipe";
 
 // If you have the auth token saved in offline storage, obtain it in async componentDidMount
 // var authToken = await AsyncStorage.getItem('HASURA_AUTH_TOKEN');
 // And use it in your headers
 // headers = { "Authorization" : "Bearer " + authToken }
-var requestOptions = {
-    "method": "POST",
-    "headers": {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer "+this.state.HASURA_AUTH_ID,
-    }
-};
 
-var body = {
-    "type": "select",
-    "args": {
-        "table": "User",
-        "columns": [
-            "User_id",
-            "User_name"
-        ],
-        "where": {
-            "$and": [
-                {
-                    "User_id": {
-                        "$ne": this.state.user_id
-                    }
-                },
-                {
-                    "Gender": {
-                        "$ne": this.state.gender
-                    }
-                },
-                {
-                    "City": {
-                        "$eq": this.state.city
-                    }
-                }
-            ]
-        }
-    }
-};
-
-requestOptions.body = JSON.stringify(body);
-fetch(url, requestOptions)
+fetch(url+"/"+this.state.user_id+"/"+this.state.gender+"/"+this.state.city+"/"+this.state.HASURA_AUTH_ID)
 .then(async(response)=> {
 	return response.json();
 })
@@ -198,19 +182,38 @@ fetch(url, requestOptions)
 
   }
 
+  _onRefresh=async()=> {
+    this.setState({refreshing:true});
+    console.log("heffrbfgkjfdjk")
+    this.fetchInfo;
+    this.setState({refreshing:false});
+    }
+
+  
+ 
+  
+
   render() {
-    
+    console.log("SwipeScreen RENDERED AGAIN");
    
-   console.log("Inrednder");
-   console.log(this.state.cards);
-   //console.log(this.state.currentUser);
-    
+  
    
-    if(this.state.cards.length>1){
+    if(this.state.gender && this.state.city){
+      if(this.state.cards.length>0){
       return(
         <Container>
-        <View>
-          <View style={{padding:20, paddingTop:30}}>
+          
+        <Content refreshControl={
+          <RefreshControl
+          
+          refreshing={this.state.refreshing}
+            onRefresh={this.fetchInfo}
+            tintColor='#ff5f64'
+            colors={['#ff5f64']}
+          />
+        }
+        >
+          <View style={{padding:20, paddingTop:50}}>
             <DeckSwiper
               ref={mr => (this._deckSwiper = mr)}
               dataSource={this.state.cards}
@@ -221,32 +224,7 @@ fetch(url, requestOptions)
                 </View>}
                 onSwipeRight={this.onLike}
                 onSwipeLeft={this.onDislike}
-              renderItem={
-                item =>
-                <Card style={{ elevation: 3 }}>
-                  <CardItem>
-                    <Left>
-                      <Text>Hi</Text>
-                        <Body>
-                          <Text>
-                            {item.User_id}
-                          </Text>
-                          <Text note>NativeBase</Text>
-                        </Body>
-                      </Left>
-                    </CardItem>
-                    <CardItem cardBody>
-                    </CardItem>
-                    <CardItem>
-                      <IconNB name={"ios-heart"} style={{ color: "#ED4A6A" }} />
-                        <Text>
-                          {item.User_name}
-                        </Text>
-                    </CardItem>
-                  </Card>
-
-              }
-
+              renderItem={this.displayCards}
               /> 
             </View>
             <View  style={{
@@ -255,102 +233,75 @@ fetch(url, requestOptions)
             justifyContent: "center",
             alignItems:'center',
             padding: 30,
-            marginTop:400
+            marginTop:370,
           }}>
-      <Button rounded style={styles.button} onPress={() => this._deckSwiper._root.swipeLeft()}>
-            <FAIcon style={{fontSize:20, color:'lightgrey'}} name="undo" />
-          </Button>
+      
         
           <Button rounded style={[styles.button,{height:60,width:60}]} onPress={() => this._deckSwiper._root.swipeLeft()}>
-            <EIcon style={{fontSize:40, color:'red'}}name="cross" />
+            <EIcon style={{fontSize:40, color:'red'}} name="cross" />
           </Button>
-          <Button rounded style={styles.button} onPress={() => this._deckSwiper._root.swipeLeft()}>
-            <Icon style={{fontSize:22, color:'blue'}} name="ios-star" />
-          </Button>
+         
+          
           
           <Button style={[styles.button,{height:60,width:60}]} onPress={this.onButtonLike}>
             <Icon name="heart" style={{color:'rgb(69,169,76)',fontSize:30}} />
           </Button>
-          <Button rounded style={styles.button} onPress={() => this._deckSwiper._root.swipeLeft()}>
-            <Icon style={{fontSize:30, color:'purple'}} name="ios-flash" />
-          </Button>
+          
           <Text>{this.state.currentUser}</Text>
         </View>
-        </View>
+        </Content>
         </Container>
       );
     }
+  else{
+    return(
+<Content refreshControl={
+          <RefreshControl
+            refreshing={this.state.refreshing}
+            onRefresh={this.fetchInfo}
+            tintColor='#ff5f64'
+            colors={['#ff5f64']}
+          />
+        }
+        style={{backgroundColor:'white'}} >
+<View style={{marginTop:deviceWidth/2, backgroundColor:'white',alignItems:'center'}}>
+<Thumbnail large source={logo} />
+            <Text style={{textAlign:'center',justifyContent:'center', flex:10, color:'#ff5f64', fontSize:25, padding:35}}>
+              Finding people near you....
+            </Text>
+            
+          </View>
+  </Content>
+  
+    );
+  }
+}
     else{
       return(
-        <Content>
-        <View style={{alignItems:'center', justifyContent:'center' ,marginTop: deviceHeight/2,marginLeft: deviceWidth/2 -60 }}>
-        <Button rounded onPress={this.fetchInfo} style={{backgroundColor:'#ff5f64'}} >
-        <Text>Click Here</Text>
-        </Button></View></Content>
+        <Content refreshControl={
+          <RefreshControl
+            refreshing={this.state.refreshing}
+            onRefresh={this.fetchInfo}
+            tintColor='#ff5f64'
+            colors={['#ff5f64']}
+          />
+        } >
+        
+        <View style={{backgroundColor:'#ff5f64',padding:30, alignItems:'center'}}>
+        <Thumbnail large source={logo} />
+            <Text style={{textAlign:'center',justifyContent:'center', flex:10, color:'white', fontSize:25, padding:35}}>
+            Hey there! Add your gender and city, and pull to refresh!
+            </Text>
+            <Button rounded style={{alignSelf:'center',backgroundColor:'white',marginBottom:35}} onPress={()=>this.props.navigation.navigate("ProfileScreen")}>
+              <Text style={{color:'#ff5f64'}}>Click Here</Text>
+            </Button>
+          </View>
+          </Content>
       );
     }
   }
   }
-   /* displayCards()
-    {
-    return (
-      
-      <Container>
-        <View style={{ flex: 1, padding: 25, paddingTop:50, paddingBottom:0}}>
-        
-          <DeckSwiper
-            ref={(deck) => (this._deckSwiper = deck)}
-            dataSource={this.state.cards}
-            onSwipeLeft={this.onDisLike}
-            onSwipeRight={this.onLike}
-            looping={false}
-            
-            renderItem={item =>
-              <Card>
-                
-               <CardItem cardBody>
-                  
-                    <Text >{item.User_name}</Text>
-                </CardItem>
-              </Card>}
-
-          />
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            position: "absolute",
-            bottom: 50,
-            left:30,
-            right:30,
-            justifyContent: "center",
-            alignItems:'center',
-            padding: 30,
-          }}
-        >
-        <Button rounded style={styles.button} onPress={() => this._deckSwiper._root.swipeLeft()}>
-            <FAIcon style={{fontSize:20, color:'lightgrey'}} name="undo" />
-          </Button>
-        
-          <Button rounded style={[styles.button,{height:60,width:60}]} onPress={() => this._deckSwiper._root.swipeLeft()}>
-            <EIcon style={{fontSize:40, color:'red'}}name="cross" />
-          </Button>
-          <Button rounded style={styles.button} onPress={() => this._deckSwiper._root.swipeLeft()}>
-            <Icon style={{fontSize:22, color:'blue'}} name="ios-star" />
-          </Button>
-          
-          <Button style={[styles.button,{height:60,width:60}]} onPress={() => this._deckSwiper._root.swipeRight()}>
-            <Icon name="heart" style={{color:'rgb(69,169,76)',fontSize:30}} />
-          </Button>
-          <Button rounded style={styles.button} onPress={() => this._deckSwiper._root.swipeLeft()}>
-            <Icon style={{fontSize:30, color:'purple'}} name="ios-flash" />
-          </Button>
-          
-        </View>
-      </Container>
-    );}
-    */
-  
+   
 
 
 export default SwipeScreen;
@@ -363,7 +314,7 @@ const styles = StyleSheet.create({
     backgroundColor:'white', 
     alignItems:'center', 
     justifyContent:'center',
-    margin:5,
+    margin:35,
   },
   textOnImg:{
     position:'absolute',

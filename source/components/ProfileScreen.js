@@ -14,18 +14,54 @@ export default class ProfileScreen extends Component {
       city:'',
       gender:'',
       HASURA_AUTH_ID:'abc',
+      HASURA_AUTH_TOKEN:'',
       user_id:'',
       username:'',
       isLoggedIn:true,
+      fileid:'',
     }
     this.addUserData=this.addUserData.bind(this);
+  }
+
+  componentDidMount=async()=>{
+    console.log("Profilescreen mounted");
+    await AsyncStorage.getItem('HASURA_AUTH_TOKEN').then((value)=>{
+      this.setState({'HASURA_AUTH_TOKEN':value})
+      console.log("jhnhgnh     "+this.state.HASURA_AUTH_TOKEN);
+    });
+    await AsyncStorage.getItem('username').then((value)=>{
+      this.setState({'username':JSON.parse(value)})
+      console.log(this.state.username);
+    });
+    await AsyncStorage.getItem('city').then((value)=>{
+      this.setState({'city':value})
+      console.log(this.state.city);
+    });
+    await AsyncStorage.getItem('gender').then((value)=>{
+      this.setState({'gender':value})
+      console.log(this.state.gender);
+    });
+    await AsyncStorage.getItem('fileid').then((value)=>{
+      this.setState({'fileid':value})
+      console.log(this.state.fileid);
+    });
+    if(this.state.fileid!=null)
+    {
+      let source = { uri: 'https://filestore.bleed71.hasura-app.io/v1/file/'+this.state.fileid };
+      this.setState({ImageSource:source});
+    }
+    
+  }
+
+  componentDidUpdate(){
+    console.log("Profile screen updated....!")
   }
   
 
   addUserData=async()=>{
     await AsyncStorage.getItem('HASURA_AUTH_TOKEN').then((value)=>{
-      this.setState({'HASURA_AUTH_ID':value})
-      console.log(this.state.HASURA_AUTH_ID);
+      this.setState({'HASURA_AUTH_TOKEN':value})
+      console.log(this.state.HASURA_AUTH_TOKEN);
     });
     await AsyncStorage.getItem('user_id').then((value)=>{
       this.setState({'user_id':value})
@@ -48,7 +84,7 @@ export default class ProfileScreen extends Component {
         "method": "POST",
         "headers": {
             "Content-Type": "application/json",
-            "Authorization": "Bearer "+this.state.HASURA_AUTH_ID
+            "Authorization": "Bearer "+this.state.HASURA_AUTH_TOKEN
           }
     };
     console.log("after requestoptions");
@@ -88,8 +124,8 @@ export default class ProfileScreen extends Component {
    handleLogout=async()=>{
     console.log("in login");
     await AsyncStorage.getItem('HASURA_AUTH_TOKEN').then((value)=>{
-      this.setState({'HASURA_AUTH_ID':value})
-      console.log(this.state.HASURA_AUTH_ID);
+      this.setState({'HASURA_AUTH_TOKEN':value})
+      console.log(this.state.HASURA_AUTH_TOKEN);
     });
     
     var url = "https://app.bleed71.hasura-app.io/APIEP_Logout";
@@ -100,7 +136,7 @@ export default class ProfileScreen extends Component {
         }
       };
       var body = {
-          "auth_key":this.state.HASURA_AUTH_ID
+          "auth_key":this.state.HASURA_AUTH_TOKEN
           
     };
     requestOptions.body = JSON.stringify(body);
@@ -116,21 +152,26 @@ export default class ProfileScreen extends Component {
       
               console.log('Request Failed locally  6' + error);
           });
-        this.props.navigation.goBack(null);
-     /* this.props.navigation.dispatch({
-        type:NavigationActions.NAVIGATE,
-        routeName:'LoginPage',
-        action:{
-          type: NavigationActions.RESET,
-          index:0,
-          actions:[{ type:NavigationActions.NAVIGATE, routeName:'LoginPage'}]
-        }
-    })*/
+
+    AsyncStorage.removeItem('city',(err)=>
+      console.log("Removed city",err));
+    AsyncStorage.removeItem('gender',(err)=>
+      console.log("Removed gender",err));
+    AsyncStorage.removeItem('HASURA_AUTH_TOKEN',(err)=>
+      console.log("Removed hasura auth id",err));
+    AsyncStorage.removeItem('user_id',(err)=>
+      console.log("Removed user_id",err));
+    AsyncStorage.removeItem('username',(err)=>
+      console.log("Removed username",err));
+      AsyncStorage.removeItem('fileid',(err)=>
+      console.log("Removed fileid",err));
+      this.props.navigation.goBack(null);
+     
 
   }
 
-  handleCityChange = city => {
-    this.setState({
+  handleCityChange = async(city) => {
+      this.setState({
         ...this.state,
         city: city
     })
@@ -154,6 +195,7 @@ export default class ProfileScreen extends Component {
     };
 
   ImagePicker.showImagePicker(options, (response) => {
+    
       console.log('Response = ', response);
 
       if (response.didCancel) {
@@ -166,9 +208,13 @@ export default class ProfileScreen extends Component {
         console.log('User tapped custom button: ', response.customButton);
       }
       else {
+         
+
         let source = { uri: response.uri };
-        var url = "https://api.boat40.hasura-app.io/APIEP_PP";
-        var auth_token = "6868272c7b4e8efab9d8a8b3cb864a651cf8c6ca492b192c"
+         console.log(this.state.HASURA_AUTH_TOKEN);
+        console.log("befor pp request");
+        var url = "https://app.bleed71.hasura-app.io/APIEP_PP";
+        var auth_token = this.state.HASURA_AUTH_TOKEN;
         const data = new FormData();
         data.append('user_auth_token', auth_token); // add auth token
         data.append('photo', {
@@ -199,7 +245,7 @@ export default class ProfileScreen extends Component {
     });
   }
 render() {
-  console.log(this.props.navigation)
+  console.log("Profile render");
   return (
       <Container>
         <Content>
@@ -217,7 +263,7 @@ render() {
               <Text style={{fontWeight:'bold', fontSize: 25}}>{this.state.username}</Text>
             </View>
         
-            <View style={{marginBottom:15,backgroundColor:'white',padding:12}}>
+            <View style={{marginBottom:20,backgroundColor:'white',padding:10}}>
               <Text style={[styles.heading,{color:'#ff5f64', marginBottom:10, paddingLeft:15}]}>Discovery Settings</Text>
               <TextInput underlineColorAndroid= 'transparent'
                   placeholder="Enter City"
@@ -292,6 +338,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'gainsboro',
-    
+    overflow: 'hidden'
   },
 })

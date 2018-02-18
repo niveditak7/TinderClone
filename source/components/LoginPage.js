@@ -1,9 +1,11 @@
 import React, { Component } from "react";
-import { Container, Content, Card, CardItem, Text, Body,Right, Left, Header, Title, Button, Icon, Form, Item, Label, Input,  } from "native-base";
-import Animated, { TextInput } from "react-native";
+import { Container, Content, Card, CardItem, Text, Body,Right, Left, Header, Title, Button, Icon, Form, Item, Label, Thumbnail, Input,  } from "native-base";
+import Animated, { TextInput, Dimensions } from "react-native";
 import Tabs from "./Tabs";
 import { View, Alert } from 'react-native';
 import {AsyncStorage }from 'react-native';
+const logo = require("./tinderlogo.jpg");
+const deviceWidth = Dimensions.get("window").width;
 
 //const url = "https://auth.bleed71.hasura-app.io/v1/signup";
 export default class LoginPage extends React.Component{
@@ -22,6 +24,17 @@ export default class LoginPage extends React.Component{
           this.handleSignupPressed=this.handleSignupPressed.bind(this);
       
         }
+
+    componentDidMount=async()=>{
+        console.log("LoginScreen mounted");
+       await AsyncStorage.getItem('HASURA_AUTH_TOKEN').then((value)=>{
+            this.setState({'HASURA_AUTH_TOKEN':value})
+            console.log(this.state.HASURA_AUTH_TOKEN);
+          });
+          if(this.state.HASURA_AUTH_TOKEN != null){
+            this.props.navigation.navigate("Tabs");
+          }
+    }
 
 
     handleLoginPressed = async () => {
@@ -49,7 +62,8 @@ export default class LoginPage extends React.Component{
             if(response.status===200){
                 this.setState({isLoggedIn: true});
                 console.log("Login Response");
-                console.log(response)
+                console.log(response);
+
             }
         else{
             Alert.alert("Error", "Password too short / User already exists")
@@ -73,14 +87,30 @@ export default class LoginPage extends React.Component{
             console.log("Username:"+result[0].username);
             await AsyncStorage.setItem('username',JSON.stringify(result[0].username));
 
-            console.log("Gender:"+(result[1].Gender))
-            await AsyncStorage.setItem('gender',(result[1].Gender));
+            
 
+            console.log("Gender:"+(result[1].Gender))
+            if(result[1].Gender!=null){
+                await AsyncStorage.setItem('gender',(result[1].Gender));
+            }
+
+            console.log("fileid:"+(result[1].fileid))
+            if(result[1].fileid!=null)
+            {
+                await AsyncStorage.setItem('fileid',(result[1].fileid));
+            }
+            else{
+                await AsyncStorage.setItem('fileid',JSON.stringify(result[1].fileid));
+            }
+            
+            
             
             console.log("City:"+(result[1].City))
-            await AsyncStorage.setItem('city',(result[1].City));
-
-            this.props.navigation.navigate("Tabs");
+            if(result[1].City!=null){
+                await AsyncStorage.setItem('city',(result[1].City));
+            }
+          this.props.navigation.navigate("Tabs");
+           
         })
         .catch(function(error) {
             console.log('Request Failed:' + error);
@@ -112,7 +142,7 @@ export default class LoginPage extends React.Component{
              if(response.status===200){
                   this.setState({isLoggedIn: true});
                   console.log(response);
-                   this.props.navigation.navigate("Tabs");
+                  
                     
                 }
             else{
@@ -121,14 +151,22 @@ export default class LoginPage extends React.Component{
             return response.json();
         })
         .then(async(result)=> {
+            console.log("Hello");
+            console.log(result);
+            console.log(result[0].auth_token);
+            await AsyncStorage.setItem('HASURA_AUTH_TOKEN', result[0].auth_token);
+            this.setState({HASURA_AUTH_TOKEN: result[0].auth_token});
+            console.log(JSON.stringify(result[0].hasura_id));
+            await AsyncStorage.setItem('user_id', JSON.stringify(result[0].hasura_id));
+            this.setState({'user_id': result[0].hasura_id});
+            this.props.navigation.navigate("Tabs");
+            
   	// To save the auth token received to offline storage
     //var authToken = result.auth_token
-            console.log("Before auth token");
+         /*   console.log("Before auth token");
             console.log(result.auth_token);
-            console.log(JSON.stringify(result.auth_token));
             await AsyncStorage.setItem('HASURA_AUTH_TOKEN', result.auth_token);
             this.setState({HASURA_AUTH_TOKEN: result.auth_token})
-            console.log(this.state.user_id);
             console.log("result:"+result.username);
             console.log(JSON.stringify(result.hasura_id));
             await AsyncStorage.setItem('user_id', JSON.stringify(result.hasura_id));
@@ -138,11 +176,12 @@ export default class LoginPage extends React.Component{
             res_username1= res_username.substring(1,res_username.length-1);
             res_password1= JSON.stringify(body.data.password);
             res_password= res_password1.substring(1,res_password1.length-1);
-            res_id= JSON.stringify(result.hasura_id);
+            res_id= JSON.stringify(result.hasura_id);*/
         })
-        .then(function(result)
+      /*  .then(function(result)
         {
-            var url = "https://data.bleed71.hasura-app.io/v1/query";
+            console.log(result);
+           var url = "https://data.bleed71.hasura-app.io/v1/query";
             var requestOptions = {
                 "method": "POST",
                 "headers": {
@@ -178,7 +217,8 @@ export default class LoginPage extends React.Component{
             .catch(function(error) {
             console.log('Request Failed:' + error);
             });
-        })
+            
+        })*/
         .catch(function(error) {
 	        console.log('Request Failed:' + error);
         });
@@ -199,19 +239,16 @@ export default class LoginPage extends React.Component{
     }
 
     render(){
-     /*   if(this.state.isLoggedIn === true){
-            return (
-               <Container>
-                 <Tabs />
-                 </Container>
-            );
-          }
-          */
+        
+          
           return(
 
-      <Container style={{backgroundColor:'white', padding:30}}>
+      <Container style={{backgroundColor:'white', padding:20}}>
       
-        <View>
+        <View style={{marginTop:30}}>
+        <View style={{alignItems:'center'}}>
+        <Thumbnail large source={logo} />
+        </View>
         <Form>
               <Item floatingLabel>
                 <Label>Username</Label>
@@ -222,14 +259,16 @@ export default class LoginPage extends React.Component{
                 <Input value={this.state.passwordTextbox} onChangeText={this.handlePasswordChange} secureTextEntry/>
               </Item>
             </Form>
-            <View style = {{height:10}} />
-                <Button block rounded onPress={this.handleSignupPressed} >
-                <Text> Sign up </Text>
+            <View style = {{alignItems:'center',marginLeft:deviceWidth/5}}>
+            <View style = {{height:10, marginTop:50, alignItems:'center'}} />
+                <Button rounded onPress={this.handleSignupPressed} style={{backgroundColor:'#ff5f64',width:200}} >
+                <Text>                Sign Up </Text>
             </Button>
-            <View style = {{height:10}} />
-            <Button block rounded title="Log in" onPress={this.handleLoginPressed} >
-              <Text> Log in </Text>
+            <View style = {{height:10, alignItems:'center', marginTop:15}} />
+            <Button rounded title="Log in" onPress={this.handleLoginPressed} style={{backgroundColor:'#ff5f64', width:200}} >
+              <Text>                  Log In </Text>
             </Button>
+            </View>
         </View>
       </Container>
           );

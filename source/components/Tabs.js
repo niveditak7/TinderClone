@@ -6,6 +6,7 @@ import { StackNavigator, TabNavigator } from "react-navigation";
 import SwipeScreen from "./SwipeScreen";
 import MessagesScreen from "./MessagesScreen";
 import ProfileScreen from "./ProfileScreen";
+import SwipeStack from './SwipeStack';
 
 const Tabs = TabNavigator ({
   ProfileScreen: {
@@ -17,7 +18,7 @@ const Tabs = TabNavigator ({
       ),
     }
   },
-  SwipeScreen: {
+  SwipeScreenk: {
     screen: SwipeScreen,
     navigationOptions:{
       title: 'SwipeScreen',
