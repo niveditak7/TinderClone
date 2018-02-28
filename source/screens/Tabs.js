@@ -35,7 +35,7 @@ const Tabs = TabNavigator(
         )
       }
     },
-    SwipeScreenk: {
+    SwipeScreen: {
       screen: SwipeScreen,
       navigationOptions: {
         title: "SwipeScreen",

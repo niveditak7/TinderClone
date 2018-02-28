@@ -96,14 +96,17 @@ export default class LoginPage extends React.Component {
           "username",
           JSON.stringify(result[0].username)
         );
-
+        
+        this.setState({usernameTextBox:''});
+        this.setState({passwordTextBox:''});
+        
         this.props.navigation.navigate("Tabs");
+        
         console.log("Gender:" + result[1].Gender);
         if (result[1].Gender != null) {
           await AsyncStorage.setItem("gender", result[1].Gender);
         }
 
-        console.log("City:" + result[1].City);
         if (result[1].City != null) {
           await AsyncStorage.setItem("city", result[1].City);
         }
@@ -111,14 +114,18 @@ export default class LoginPage extends React.Component {
         console.log("fileid:" + result[1].fileid);
         if (result[1].fileid != null) {
           await AsyncStorage.setItem("fileid", result[1].fileid);
-          console.log("........................fileid");
+          console.log("fileid");
           await AsyncStorage.getItem("fileid").then(value => {
             console.log("      " + value);
+
+            
           });
         }
         //  else{
         //      await AsyncStorage.setItem('fileid',JSON.stringify(result[1].fileid));
         // }
+       
+        
       })
       .catch(function(error) {
         console.log("Request Failed:" + error);
@@ -166,7 +173,13 @@ export default class LoginPage extends React.Component {
           "user_id",
           JSON.stringify(result[0].hasura_id)
         );
+        await AsyncStorage.setItem(
+          "username",
+          JSON.stringify(result[0].username)
+        );
         this.setState({ user_id: result[0].hasura_id });
+        this.setState({usernameTextBox:''});
+        this.setState({passwordTextBox:''});
         this.props.navigation.navigate("Tabs");
       })
 
@@ -197,17 +210,17 @@ export default class LoginPage extends React.Component {
             <Thumbnail large source={logo} />
           </View>
           <Form>
-            <Item floatingLabel>
-              <Label>Username</Label>
+            <Item>
               <Input
+               placeholder="Username"
                 value={this.state.usernameTextBox}
                 onChangeText={this.handleUsernameChange}
               />
             </Item>
             <Item floatingLabel>
-              <Label>Password</Label>
               <Input
-                value={this.state.passwordTextbox}
+              placeholder="Password"
+                value={this.state.passwordTextBox}
                 onChangeText={this.handlePasswordChange}
                 secureTextEntry
               />

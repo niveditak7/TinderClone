@@ -152,7 +152,7 @@ export default class MtachesScreen extends Component {
                 paddingTop: 10
               }}
             >
-              When you match with other users they'll appear here.
+              When you match with other users they'll appear here. Pull downwards to refresh.
             </Text>
           </View>
         </Content>
